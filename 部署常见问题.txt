@@ -1,0 +1,63 @@
+龙果支付部署常见问题汇总
+
+1.sql 函数执行报错
+
+解决：
+delimiter $$
+CREATE FUNCTION `FUN_SEQ`(SEQ VARCHAR(50)) RETURNS BIGINT(20)
+BEGIN
+     UPDATE SEQ_TABLE
+     SET CURRENT_VALUE = CURRENT_VALUE + INCREMENT
+     WHERE  SEQ_NAME=SEQ;
+     RETURN (FUN_SEQ_CURRENT_VALUE(SEQ));
+END $$
+
+delimiter ;
+
+
+2. alipay-sdk-java20151021120052.jar 和 alipay-trade-sdk.jar 加载问题
+
+ 方法一：
+有私服的用以下方式：
+cd ~\git\roncoo-pay\roncoo-pay-service\src\lib （改为自己本地）
+
+mvn deploy:deploy-file -DgroupId=alipay -DartifactId=alipay-sdk-java20151021120052 -Dversion=1.0 -Dpackaging=jar -Dfile=alipay-sdk-java20151021120052.jar -Durl=http://10.1.1.1:8081/repository/releases/ -DrepositoryId=releases
+
+mvn deploy:deploy-file -DgroupId=alipay -DartifactId=alipay-trade-sdk -Dversion=1.0 -Dpackaging=jar -Dfile=alipay-trade-sdk.jar -Durl=http://10.1.1.1:8081/repository/releases/ -DrepositoryId=releases
+
+
+没用私服的话,自己安装下本地jar包吧.执行下面命令即可. -Dfile 代表jar存在路径.
+
+mvn install:install-file -DgroupId=alipay -DartifactId=alipay-sdk-java20151021120052 -Dversion=1.0 -Dpackaging=jar -Dfile=D:\workspace\rpd_170111\roncoo-pay\roncoo-pay-service\src\lib\alipay-sdk-java20151021120052.jar
+
+mvn install:install-file -DgroupId=alipay -DartifactId=alipay-trade-sdk -Dversion=1.0 -Dpackaging=jar -Dfile=D:\workspace\rpd_170111\roncoo-pay\roncoo-pay-service\src\lib\alipay-trade-sdk.jar
+
+ 然后在roncoo-pay-service 和 roncoo-pay-common-core 中的pom.xml文件添加
+	<dependency>
+		<groupId>alipay</groupId>
+		<artifactId>alipay-sdk-java20151021120052</artifactId>
+		<version>1.0</version>
+	</dependency>
+	<dependency>
+		<groupId>alipay</groupId>
+		<artifactId>alipay-trade-sdk</artifactId>
+		<version>1.0</version>
+	</dependency>
+
+
+ 方法二（不怎么行）：
+ 	修改roncoo-pay-service 和 roncoo-pay-common-core 中的pom.xml
+ 	添加
+        <dependency>
+            <groupId>alipay</groupId>
+            <artifactId>alipay-sdk-java20151021120052</artifactId>
+            <scope>system</scope>
+            <systemPath>/Users/damon/Java program/roncoo-pay-master/roncoo-pay-service/src/lib/alipay-sdk-java20151021120052.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>alipay</groupId>
+            <artifactId>alipay-trade-sdk</artifactId>
+            <scope>system</scope>
+            <systemPath>/Users/damon/Java program/roncoo-pay-master/roncoo-pay-service/src/lib/alipay-trade-sdk.jar</systemPath>
+        </dependency>
